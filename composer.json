@@ -3,6 +3,7 @@
     "description": "Checkstyle integration to stash/bitbucket",
     "type": "library",
     "license": "MIT",
+    "minimum-stability": "dev",
     "authors": [
         {
             "name": "Erofeev",
