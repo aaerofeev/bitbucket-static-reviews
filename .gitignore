@@ -1,0 +1,3 @@
+/vendor/
+.idea/**/*
+rest-client.env.json

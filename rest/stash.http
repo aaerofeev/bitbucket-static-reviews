@@ -1,0 +1,51 @@
+### Получает активый pull-request для ветки
+
+GET {{host}}/rest/api/1.0/projects/{{project}}/repos/{{repository}}/pull-requests
+ ?at={{branch}}&direction=OUTGOING&state=OPEN&order=NEWEST
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Получает комментарии
+
+GET {{host}}/rest/api/1.0/projects/{{project}}/repos/{{repository}}/pull-requests/{{pullRequestId}}/comments
+ ?path=static/.eslintrc
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Получает diff
+
+GET {{host}}/rest/api/1.0/projects/{{project}}/repos/{{repository}}/pull-requests/{{pullRequestId}}/diff
+ ?path=static/.eslintrc
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Публикует комментарий
+
+POST {{host}}/rest/api/1.0/projects/{{project}}/repos/{{repository}}/pull-requests/{{pullRequestId}}/comments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "text": "Тестовый комментарий",
+  "anchor": {
+    "line": 31,
+    "lineType": "CONTEXT",
+    "path": "static/.eslintrc",
+    "srcPath": "static/.eslintrc"
+  }
+}
+
+### Публикует комментарий как ответ
+
+POST {{host}}/rest/api/1.0/projects/{{project}}/repos/{{repository}}/pull-requests/{{pullRequestId}}/comments
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "text": "Тестовый комментарий который поясняет",
+  "parent": {
+    "id": 117550
+  }
+}
+
+###

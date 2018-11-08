@@ -1,0 +1,24 @@
+{
+    "name": "aaerofeev/checkstyle-stash",
+    "description": "Checkstyle integration to stash/bitbucket",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Erofeev",
+            "email": "erofeev@kolesa.kz"
+        }
+    ],
+    "require": {
+        "php": ">=7.0",
+        "ext-curl": "*",
+        "ext-json": "*",
+        "guzzlehttp/guzzle": "^6.3"
+    },
+    "autoload":{
+        "psr-4":{
+            "CheckstyleStash\\": ["src"]
+        }
+    },
+    "bin":["checkstyle-stash"]
+}
