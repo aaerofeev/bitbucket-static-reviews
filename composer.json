@@ -11,10 +11,13 @@
         }
     ],
     "require": {
-        "php": ">=7.0",
+        "php": "7.0",
         "ext-curl": "*",
         "ext-json": "*",
-        "guzzlehttp/guzzle": "^6.3"
+        "guzzlehttp/guzzle": "^6.3",
+        "ptlis/diff-parser": "~0.6",
+        "ext-simplexml": "*",
+        "ext-mbstring": "*"
     },
     "autoload":{
         "psr-4":{

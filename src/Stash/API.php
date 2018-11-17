@@ -13,6 +13,21 @@ use Psr\Http\Message\ResponseInterface;
 class API
 {
     /**
+     * Все комментарии
+     */
+    public const ANCHOR_STATE_ALL = 'ALL';
+
+    /**
+     * Устаревшие
+     */
+    public const ANCHOR_STATE_ORPHANED = 'ORPHANED';
+
+    /**
+     * Активные
+     */
+    public const ANCHOR_STATE_ACTIVE = 'ACTIVE';
+
+    /**
      * @var string Ключ для авторизации
      */
     protected $secretKey;
@@ -26,11 +41,6 @@ class API
      * @var string Имя репозитория
      */
     protected $repository;
-
-    /**
-     * @var string Хост API
-     */
-    protected $url;
 
     /**
      * @var string Версия stash API
@@ -48,27 +58,68 @@ class API
     protected $clientTimeout = 3.0;
 
     /**
+     * @var int Идентификатор пользователя
+     */
+    protected $userId;
+
+    /**
      * Конструктор
      *
      * @param string $url
      * @param string $secretKey
      * @param string $project
      * @param string $repository
+     * @param bool   $debug
+     * @throws \CheckstyleStash\Exception\StashException
      */
-    public function __construct(string $url, string $secretKey, string $project, string $repository)
-    {
+    public function __construct(
+        string $url,
+        string $secretKey,
+        string $project,
+        string $repository,
+        bool $debug = false
+    ) {
         $this->secretKey  = $secretKey;
         $this->project    = $project;
         $this->repository = $repository;
-        $this->url        = trim($url, '/');
         $this->client     = new GuzzleHttp\Client([
-            'base_uri'                                 => sprintf('%s/rest/api/%s/', $url, $this->version),
+            'base_uri'                                 => sprintf('%s/rest/api/%s/', trim($url, '/'), $this->version),
             GuzzleHttp\RequestOptions::CONNECT_TIMEOUT => $this->clientTimeout,
+            GuzzleHttp\RequestOptions::DEBUG           => $debug,
             GuzzleHttp\RequestOptions::HEADERS         => [
                 'Content-Type'  => 'application/json',
                 'Authorization' => 'Bearer ' . $this->secretKey,
             ],
         ]);
+
+        $this->ping();
+    }
+
+    /**
+     * @see API::$userId
+     * @return int
+     */
+    public function getUserId(): int
+    {
+        return $this->userId;
+    }
+
+    /**
+     * Проверяет готовность API
+     *
+     * @throws \CheckstyleStash\Exception\StashException
+     */
+    public function ping(): void
+    {
+        $response = $this->client->get(sprintf('projects/%s/repos/%s', $this->project, $this->repository));
+
+        if (!$response->hasHeader('X-AUSERID')) {
+            throw new StashException(
+                'Ошибка инициализации, не верный ответ: ' . GuzzleHttp\json_encode($response->getBody())
+            );
+        }
+
+        $this->userId = (int) ($response->getHeader('X-AUSERID')[0] ?? 0);
     }
 
     /**
@@ -78,10 +129,10 @@ class API
      * @return int
      * @throws \CheckstyleStash\Exception\StashException
      */
-    public function getOpenPRId(string $branch): int
+    public function getOpenPullRequestId(string $branch): int
     {
         $response = $this->client->get(
-            sprintf('/projects/%s/repos/%s/pull-requests', $this->project, $this->repository),
+            sprintf('projects/%s/repos/%s/pull-requests', $this->project, $this->repository),
             ['query' => ['at' => $branch, 'status' => 'OPEN', 'direction' => 'OUTGOING', 'order' => 'NEWEST']]
         );
 
@@ -95,16 +146,54 @@ class API
     }
 
     /**
-     * Публикует комментарий
+     * Получает комментарии для файла
      *
-     * @param \CheckstyleStash\Stash\Comment $comment
-     * @return int
+     * @param int    $pullRequestId
+     * @param string $path
+     * @param string $anchorState
+     * @return \CheckstyleStash\Stash\Comment[]
      * @throws \CheckstyleStash\Exception\StashException
      */
-    public function postComment(Comment $comment): Comment
+    public function getComments(int $pullRequestId, string $path, string $anchorState = self::ANCHOR_STATE_ALL): array
+    {
+        $response = $this->client->get(
+            sprintf(
+                'projects/%s/repos/%s/pull-requests/%d/comments',
+                $this->project,
+                $this->repository,
+                $pullRequestId
+            ),
+            ['query' => ['path' => $path, 'anchorState' => $anchorState]]
+        );
+
+        $data = $this->getResponseAsArray($response, 200);
+
+        if (!isset($data['values'])) {
+            throw new StashException(
+                sprintf('Не удалось получить комментарии для %d по пути %s', $pullRequestId, $path)
+            );
+        }
+
+        return array_map([Comment::class, 'fromArray'], (array) $data['values']);
+    }
+
+    /**
+     * Публикует комментарий
+     *
+     * @param int                            $pullRequestId
+     * @param \CheckstyleStash\Stash\Comment $comment
+     * @return \CheckstyleStash\Stash\Comment
+     * @throws \CheckstyleStash\Exception\StashException
+     */
+    public function postComment(int $pullRequestId, Comment $comment): Comment
     {
         $response = $this->client->post(
-            sprintf('/projects/%s/repos/%s/pull-requests/comments', $this->project, $this->repository),
+            sprintf(
+                'projects/%s/repos/%s/pull-requests/%d/comments',
+                $this->project,
+                $this->repository,
+                $pullRequestId
+            ),
             ['json' => $comment]
         );
 
@@ -134,7 +223,7 @@ class API
         try {
             return GuzzleHttp\json_decode($response->getBody()->getContents(), true);
         } catch (\InvalidArgumentException $e) {
-            throw new StashException('Получен не верное тело ответа. ' . $e->getMessage());
+            throw new StashException('Получен не верное тело ответа: ' . $e->getMessage());
         }
     }
 }

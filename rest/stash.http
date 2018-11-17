@@ -1,4 +1,10 @@
-### Получает активый pull-request для ветки
+### Получает проект и репозиторий
+
+GET {{host}}/rest/api/1.0/projects/{{project}}/repos/{{repository}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+### Получает pull-request для ветки, открытый
 
 GET {{host}}/rest/api/1.0/projects/{{project}}/repos/{{repository}}/pull-requests
  ?at={{branch}}&direction=OUTGOING&state=OPEN&order=NEWEST
@@ -8,14 +14,14 @@ Content-Type: application/json
 ### Получает комментарии
 
 GET {{host}}/rest/api/1.0/projects/{{project}}/repos/{{repository}}/pull-requests/{{pullRequestId}}/comments
- ?path=static/.eslintrc
+ ?path=src/Model/Repository/Advert/Advert.php&anchorState=ALL&diffType=EFFECTIVE
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
 ### Получает diff
 
 GET {{host}}/rest/api/1.0/projects/{{project}}/repos/{{repository}}/pull-requests/{{pullRequestId}}/diff
- ?path=static/.eslintrc
+ ?limit=1000
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -28,10 +34,10 @@ Content-Type: application/json
 {
   "text": "Тестовый комментарий",
   "anchor": {
-    "line": 31,
+    "line": 2172,
     "lineType": "CONTEXT",
-    "path": "static/.eslintrc",
-    "srcPath": "static/.eslintrc"
+    "path": "src/Model/Repository/Advert/Advert.php",
+    "srcPath": "src/Model/Repository/Advert/Advert.php"
   }
 }
 

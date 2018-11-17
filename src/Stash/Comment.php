@@ -7,6 +7,46 @@ namespace CheckstyleStash\Stash;
 class Comment implements \JsonSerializable
 {
     /**
+     * Использовать общий diff pull request
+     */
+    public const DIFF_TYPE_EFFECTIVE = 'EFFECTIVE';
+
+    /**
+     * Использовать diff между двумя произвольными коммитами
+     */
+    public const DIFF_TYPE_COMMIT = 'COMMIT';
+
+    /**
+     * Использовать diff между двумя диапозонами коммитов
+     */
+    public const DIFF_TYPE_RANGE = 'RANGE';
+
+    /**
+     * Использовать изменненый файл
+     */
+    public const FILE_TYPE_TO = 'TO';
+
+    /**
+     * Использовать исходный файл
+     */
+    public const FILE_TYPE_FROM = 'FROM';
+
+    /**
+     * Комментарий для контекста
+     */
+    public const LINE_TYPE_CONTEXT = 'CONTEXT';
+
+    /**
+     * Для добавленной строки
+     */
+    public const LINE_TYPE_ADDED = 'ADDED';
+
+    /**
+     * Для удаленной строки
+     */
+    public const LINE_TYPE_REMOVED = 'REMOVED';
+
+    /**
      * @var int
      */
     protected $id = 0;
@@ -42,71 +82,71 @@ class Comment implements \JsonSerializable
     protected $text = 0;
 
     /**
-     * @see Comment::$id
-     * @param int $id
-     * @return Comment
+     * @var string Откуда хеш
      */
-    public function setId(int $id): Comment
+    protected $fromHash;
+
+    /**
+     * @var string Куда хеш
+     */
+    protected $toHash;
+
+    /**
+     * @var string Исходный файл или редактируемый
+     */
+    protected $fileType = self::FILE_TYPE_TO;
+
+    /**
+     * @var string Тип diff
+     */
+    protected $diffType = self::DIFF_TYPE_EFFECTIVE;
+
+    /**
+     * @var string Тип строки
+     */
+    protected $lineType = self::LINE_TYPE_ADDED;
+
+    /**
+     * @var bool Устаревший
+     */
+    protected $orphaned = false;
+
+    /**
+     * Создает сущьность из массива
+     *
+     * @param array $data
+     * @return \CheckstyleStash\Stash\Comment
+     */
+    public static function fromArray(array $data): Comment
     {
-        $this->id = $id;
-        return $this;
+        $comment           = new self();
+        $comment->id       = $data['id'] ?? 0;
+        $comment->text     = $data['text'] ?? '';
+        $comment->authorId = $data['author']['id'] ?? 0;
+        $comment->line     = $data['anchor']['line'] ?? 0;
+        $comment->path     = $data['anchor']['path'] ?? '';
+        $comment->fileType = $data['anchor']['fileType'] ?? '';
+        $comment->diffType = $data['anchor']['diffType'] ?? '';
+        $comment->lineType = $data['anchor']['lineType'] ?? '';
+        $comment->orphaned = $data['anchor']['orphaned'] ?? false;
+
+        foreach ($data['comments'] ?? [] as $child) {
+            $comment->addComment(self::fromArray($child));
+        }
+
+        return $comment;
     }
 
     /**
-     * @see Comment::$authorId
-     * @param int $authorId
-     * @return Comment
+     * Добавляет дочерний комментарий
+     *
+     * @param \CheckstyleStash\Stash\Comment $comment
+     * @return \CheckstyleStash\Stash\Comment
      */
-    public function setAuthorId(int $authorId): Comment
+    public function addComment(Comment $comment): self
     {
-        $this->authorId = $authorId;
-        return $this;
-    }
-
-    /**
-     * @see Comment::$parentId
-     * @param int $parentId
-     * @return Comment
-     */
-    public function setParentId(int $parentId): Comment
-    {
-        $this->parentId = $parentId;
-
-        return $this;
-    }
-
-    /**
-     * @see Comment::$line
-     * @param int $line
-     * @return Comment
-     */
-    public function setLine(int $line): Comment
-    {
-        $this->line = $line;
-
-        return $this;
-    }
-
-    /**
-     * @see Comment::$path
-     * @param string $path
-     * @return Comment
-     */
-    public function setPath(string $path): Comment
-    {
-        $this->path = $path;
-
-        return $this;
-    }
-
-    /**
-     * @see Comment::$text
-     * @param string $text
-     * @return Comment
-     */
-    public function setText(string $text): Comment
-    {
-        $this->text = $text;
+        $comment->setParentId($this->getId());
+        $this->comments[] = $comment;
 
         return $this;
     }
@@ -121,12 +161,50 @@ class Comment implements \JsonSerializable
     }
 
     /**
+     * @see Comment::$id
+     * @param int $id
+     * @return Comment
+     */
+    public function setId(int $id): Comment
+    {
+        $this->id = $id;
+        return $this;
+    }
+
+    /**
+     * @see Comment::$path
+     * @see Comment::$line
+     * @param string $path
+     * @param int    $line
+     * @return Comment
+     */
+    public function setDestination(string $path, int $line): Comment
+    {
+        $this->line = $line;
+        $this->path = $path;
+
+        return $this;
+    }
+
+    /**
      * @see Comment::$parentId
      * @return int
      */
     public function getParentId(): int
     {
         return $this->parentId;
+    }
+
+    /**
+     * @see Comment::$parentId
+     * @param int $parentId
+     * @return Comment
+     */
+    public function setParentId(int $parentId): Comment
+    {
+        $this->parentId = $parentId;
+
+        return $this;
     }
 
     /**
@@ -166,6 +244,17 @@ class Comment implements \JsonSerializable
     }
 
     /**
+     * @see Comment::$authorId
+     * @param int $authorId
+     * @return Comment
+     */
+    public function setAuthorId(int $authorId): Comment
+    {
+        $this->authorId = $authorId;
+        return $this;
+    }
+
+    /**
      * @see Comment::$text
      * @return string
      */
@@ -175,17 +264,75 @@ class Comment implements \JsonSerializable
     }
 
     /**
-     * Добавляет дочерний комментарий
-     *
-     * @param \CheckstyleStash\Stash\Comment $comment
-     * @return \CheckstyleStash\Stash\Comment
+     * @see Comment::$text
+     * @param string $text
+     * @return Comment
      */
-    public function addComment(Comment $comment): self
+    public function setText(string $text): Comment
     {
-        $comment->setParentId($this->getId());
-        $this->comments[] = $comment;
+        $this->text = $text;
 
         return $this;
+    }
+
+    /**
+     * @see Comment::$fileType
+     * @param string $fileType
+     * @return Comment
+     */
+    public function setFileType(string $fileType): Comment
+    {
+        $this->fileType = $fileType;
+
+        return $this;
+    }
+
+    /**
+     * @see Comment::$diffType
+     * @param string $diffType
+     * @return Comment
+     */
+    public function setDiffType(string $diffType): Comment
+    {
+        $this->diffType = $diffType;
+
+        return $this;
+    }
+
+    /**
+     * @see Comment::$lineType
+     * @param string $lineType
+     * @return Comment
+     */
+    public function setLineType(string $lineType): Comment
+    {
+        $this->lineType = $lineType;
+
+        return $this;
+    }
+
+    /**
+     * @see Comment::$fromHash
+     * @see Comment::$toHash
+     * @param string $fromHash
+     * @param string $toHash
+     * @return Comment
+     */
+    public function setRange(string $fromHash, string $toHash): Comment
+    {
+        $this->fromHash = $fromHash;
+        $this->toHash   = $toHash;
+
+        return $this;
+    }
+
+    /**
+     * @see Comment::$orphaned
+     * @return bool
+     */
+    public function isOrphaned(): bool
+    {
+        return $this->orphaned;
     }
 
     /**
@@ -200,33 +347,15 @@ class Comment implements \JsonSerializable
         } else {
             $data['anchor']             = [];
             $data['anchor']['line']     = $this->line;
-            $data['anchor']['lineType'] = 'CONTEXT';
+            $data['anchor']['lineType'] = $this->lineType;
             $data['anchor']['path']     = $this->path;
             $data['anchor']['srcPath']  = $this->path;
+            $data['anchor']['fileType'] = $this->fileType;
+            $data['anchor']['diffType'] = $this->diffType;
+            $data['anchor']['fromHash'] = $this->fromHash;
+            $data['anchor']['toHash']   = $this->toHash;
         }
 
         return $data;
-    }
-
-    /**
-     * Создает сущьность из массива
-     *
-     * @param array $data
-     * @return \CheckstyleStash\Stash\Comment
-     */
-    public static function fromArray(array $data): Comment
-    {
-        $comment = new self();
-        $comment->id = $data['id'] ?? 0;
-        $comment->text = $data['text'] ?? '';
-        $comment->authorId = $data['author']['id'] ?? 0;
-        $comment->line = $data['anchor']['line'] ?? 0;
-        $comment->path = $data['anchor']['path'] ?? '';
-
-        foreach ($data['comments'] ?? [] as $child) {
-            $comment->addComment(self::fromArray($child));
-        }
-
-        return $comment;
     }
 }
