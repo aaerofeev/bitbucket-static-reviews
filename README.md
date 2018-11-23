@@ -94,7 +94,7 @@ return [
     // Optional
     'statsd'   => [
         'host'      => '<statsd-host>',
-        'port'      => 8125,
+        'port'      => '<statsd-port>',
         'namespace' => 'myApp.code-analyze',
     ],
 ];
