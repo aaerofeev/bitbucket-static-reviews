@@ -1,5 +1,5 @@
 {
-    "name": "aaerofeev/bitbucket-statc-reviews",
+    "name": "aaerofeev/bitbucket-static-reviews",
     "description": "Checkstyle integration to stash/bitbucket pull requests",
     "type": "library",
     "license": "MIT",
