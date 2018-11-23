@@ -16,6 +16,10 @@ On English see below
 - Игнорирование по паттерну ошибки, или по файлу
 - Отправка статистики в statsd
 
+![Fixed](https://github.com/aaerofeev/bitbucket-static-reviews/blob/master/docs/Selection_006.png?raw=true)
+
+![Group](https://github.com/aaerofeev/bitbucket-static-reviews/blob/master/docs/Selection_007.png?raw=true)
+
 ### Как работает
 
 Данные которые требуются: проект, репозиторий, ветка.
