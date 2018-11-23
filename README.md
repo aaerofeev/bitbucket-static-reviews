@@ -57,6 +57,8 @@ https://developer.atlassian.com/server/bitbucket/reference/rest-api/
 
 ### Config
 
+Default name - .config.php 
+
 ```php
 <?php
 
