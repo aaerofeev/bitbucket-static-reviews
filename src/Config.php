@@ -22,33 +22,44 @@ class Config
     /**
      * Нет лимита
      */
-    public const NO_LIMIT = PHP_INT_MAX;
+    public const NO_LIMIT   = PHP_INT_MAX;
 
     /**
      * @var array Конфигурация по умолчанию
      */
     protected const DEFAULT = [
+        // Settings from stash/bitbucket
+        // https://<hostname>/projects/<project>/repos/<repository>/browse
         'stash'    => [
             'url'         => 'https://127.0.0.1',
             'accessToken' => '',
             'project'     => '',
             'repository'  => '',
+            // Write to output http requests to api
             'debug'       => false,
         ],
         'analyzer' => [
+            // Inspection type changed or context
             'inspect'       => Config::INSPECT_CHANGED,
+            // Error with ignored text will be ignored
             'ignoredText'   => [],
+            // Files in mask-style to be ignored
             'ignoredFiles'  => [],
+            // Main limit for comments
             'limit'         => Config::NO_LIMIT,
+            // Limit comments per file
             'limitPerFile'  => Config::NO_LIMIT,
+            // Limit comments per group
             'limitPerGroup' => Config::NO_LIMIT,
+            // Group errors in one comment per line
             'group'         => true,
+            // Minimum severity
             'minSeverity'   => Error::SEVERITY_WARNING,
         ],
         'statsd'   => [
-            'host'   => 'alahd-vm-graphite1.kolesa.dev',
-            'port'   => 8125,
-            'prefix' => 'krisha',
+            'host'      => '',
+            'port'      => 8125,
+            'namespace' => '',
         ],
     ];
 

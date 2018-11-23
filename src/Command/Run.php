@@ -4,6 +4,8 @@ namespace BitbucketReviews\Command;
 use BitbucketReviews\Config;
 use BitbucketReviews\Manager;
 use BitbucketReviews\Stash\API;
+use League\StatsD\Client as StatsdClient;
+use League\StatsD\Exception\ConfigurationException;
 use ptlis\DiffParser\Parser;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Exception\InvalidArgumentException;
@@ -113,8 +115,37 @@ class Run extends Command
         $manager->setMinSeverity($analyzer['minSeverity']);
         $manager->setGroup($analyzer['group']);
 
-        $stat = $manager->run();
+        $stats = $manager->run();
 
-        $output->writeln('Comments updated: ' . json_encode($stat));
+        try {
+            $this->sendStats($config, array_filter($stats, 'is_numeric'));
+        } catch (ConfigurationException $e) {
+            $output->writeln("<error>Error while send stats: {$e->getMessage()}</error>");
+        }
+
+        $output->writeln('Comments updated: ' . json_encode($stats));
+    }
+
+    /**
+     * Отправляет статистику
+     *
+     * @param \BitbucketReviews\Config $config
+     * @param array                    $stats
+     * @throws \League\StatsD\Exception\ConfigurationException
+     */
+    protected function sendStats(Config $config, array $stats)
+    {
+        $statsConfig = $config->get('statsd');
+
+        if (empty($statsConfig['host'])) {
+            return;
+        }
+
+        $statsd = new StatsdClient();
+        $statsd->configure($statsConfig);
+
+        foreach ($stats as $name => $value) {
+            $statsd->increment($name, $value);
+        }
     }
 }
