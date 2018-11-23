@@ -32,6 +32,8 @@ class Config
         // https://<hostname>/projects/<project>/repos/<repository>/browse
         'stash'    => [
             'url'         => 'https://127.0.0.1',
+            // Access token for read
+            // @see https://confluence.atlassian.com/bitbucketserver/personal-access-tokens-939515499.html
             'accessToken' => '',
             'project'     => '',
             'repository'  => '',
@@ -56,6 +58,7 @@ class Config
             // Minimum severity
             'minSeverity'   => Error::SEVERITY_WARNING,
         ],
+        // Optional
         'statsd'   => [
             'host'      => '',
             'port'      => 8125,

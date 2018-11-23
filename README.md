@@ -55,6 +55,49 @@ https://docs.atlassian.com/bitbucket-server/rest/5.15.0/bitbucket-rest.html?utm_
 
 https://developer.atlassian.com/server/bitbucket/reference/rest-api/
 
+### Config
+
+```php
+<?php
+
+use BitbucketReviews\Config;
+
+/**
+* @see \BitbucketReviews\Config
+ */
+return [
+    // Stash API config
+    // https://<hostname>/projects/<project>/repos/<repository>/browse
+    'stash'    => [
+        'url'         => 'https://bitbucket.org',
+        // @see https://confluence.atlassian.com/bitbucketserver/personal-access-tokens-939515499.html
+        'accessToken' => '<secret-token-read-perms>',
+        'project'     => '<project>',
+        'repository'  => '<repository>',
+        'debug'       => false,
+    ],
+    'analyzer' => [
+        'inspect'       => Config::INSPECT_CONTEXT,
+        'ignoredText'   => [
+            'eslint.rules.radix',
+        ],
+        'ignoredFiles'  => [
+            'composer.json',
+            'composer.lock',
+        ],
+        'limit'         => Config::NO_LIMIT,
+        'limitPerFile'  => Config::NO_LIMIT,
+        'limitPerGroup' => Config::NO_LIMIT,
+    ],
+    // Optional
+    'statsd'   => [
+        'host'      => '<statsd-host>',
+        'port'      => 8125,
+        'namespace' => 'myApp.code-analyze',
+    ],
+];
+```
+
 ### Example
 
 ```bash
