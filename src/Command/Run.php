@@ -113,6 +113,9 @@ class Run extends Command
         $manager->setIgnoredText($analyzer['ignoredText']);
         $manager->setIgnoredFiles($analyzer['ignoredFiles']);
         $manager->setMinSeverity($analyzer['minSeverity']);
+        $manager->setLimit($analyzer['limit']);
+        $manager->setLimitPerFile($analyzer['limitPerFile']);
+        $manager->setLimitPerGroup($analyzer['limitPerGroup']);
         $manager->setGroup($analyzer['group']);
 
         $stats = $manager->run();
