@@ -14,7 +14,7 @@ Content-Type: application/json
 ### Получает комментарии
 
 GET {{host}}/rest/api/1.0/projects/{{project}}/repos/{{repository}}/pull-requests/{{pullRequestId}}/comments
- ?path=src/Model/Repository/Advert/Advert.php&anchorState=ALL&diffType=EFFECTIVE
+ ?path=src/File.php&anchorState=ALL&diffType=EFFECTIVE
 Authorization: Bearer {{token}}
 Content-Type: application/json
 
@@ -32,25 +32,12 @@ Authorization: Bearer {{token}}
 Content-Type: application/json
 
 {
-  "text": "Тестовый комментарий",
+  "text": "Text",
   "anchor": {
     "line": 2172,
     "lineType": "CONTEXT",
-    "path": "src/Model/Repository/Advert/Advert.php",
-    "srcPath": "src/Model/Repository/Advert/Advert.php"
-  }
-}
-
-### Публикует комментарий как ответ
-
-POST {{host}}/rest/api/1.0/projects/{{project}}/repos/{{repository}}/pull-requests/{{pullRequestId}}/comments
-Authorization: Bearer {{token}}
-Content-Type: application/json
-
-{
-  "text": "Тестовый комментарий который поясняет",
-  "parent": {
-    "id": 117550
+    "path": "src/File.php",
+    "srcPath": "src/File.php"
   }
 }
 
