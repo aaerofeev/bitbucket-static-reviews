@@ -16,7 +16,12 @@ On English see below
 - Игнорирование по паттерну ошибки, или по файлу
 - Отправка статистики в statsd
 
+#### Auto check fixed
+
 ![Fixed](https://github.com/aaerofeev/bitbucket-static-reviews/blob/master/docs/Selection_006.png?raw=true)
+
+
+#### Group errors
 
 ![Group](https://github.com/aaerofeev/bitbucket-static-reviews/blob/master/docs/Selection_007.png?raw=true)
 
