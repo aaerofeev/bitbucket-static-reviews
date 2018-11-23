@@ -444,12 +444,12 @@ class Manager
                     $comment->setDestination($fileLine, $sourceFile->getNewFilename(), $srcPath);
 
                     $newComments[$fileLine] = $comment;
-                    $this->commentsNew[]    = $comment;
-                }
 
-                if (\count($newComments) > $limit) {
-                    $this->stat['limit_per_file']++;
-                    break 2;
+                    if (\count($newComments) <= $limit) {
+                        $this->commentsNew[]    = $comment;
+                    } else {
+                        $this->stat['limit_per_file']++;
+                    }
                 }
 
                 break;
@@ -517,7 +517,7 @@ class Manager
             $fixed = [];
 
             foreach ($parts as $key => $part) {
-                if (isset($errorContents[$comment->getId()])) {
+                if (!empty($contests[$comment->getId()])) {
                     $found = false;
 
                     foreach ($contests[$comment->getId()] as $error) {

@@ -121,7 +121,7 @@ class Run extends Command
         $stats = $manager->run();
 
         try {
-            $this->sendStats($config, array_filter($stats, 'is_numeric'));
+            $this->sendStats($config, $stats);
         } catch (ConfigurationException $e) {
             $output->writeln("<error>Error while send stats: {$e->getMessage()}</error>");
         }
@@ -138,6 +138,14 @@ class Run extends Command
      */
     protected function sendStats(Config $config, array $stats)
     {
+        $stats = array_map(function ($v) {
+            if (is_iterable($v)) {
+                return \count($v);
+            }
+
+            return $v;
+        }, $stats);
+
         $statsConfig = $config->get('statsd');
 
         if (empty($statsConfig['host'])) {
