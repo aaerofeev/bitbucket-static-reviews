@@ -102,6 +102,28 @@ return [
 
 ### Example usage
 
+```
+/vendor/bin/bitbucket-reviews run refs/head/MY_BRANCH git-diff.txt -k config.php \
+    --checkstyle eslint.xml:/code/base \
+    --checkstyle phan.xml \
+    --checkstyle phpstan.xml \
+```
+
+```
+run [options] [--] <branch> <diff>
+
+Arguments:
+  branch                         Branch name, fully path refs/heads/master
+  diff                           git diff output file path
+
+Options:
+      --diff-vsc[=DIFF-VSC]      git diff output file path [default: "git"]
+  -c, --checkstyle[=CHECKSTYLE]  checkstyle file path <filename>:<name>:<root> (multiple values allowed)
+      --config[=CONFIG]          config file [default: ".config.php"]
+```
+
+### Usage in complex
+
 ```bash
 #!/usr/bin/env bash
 
