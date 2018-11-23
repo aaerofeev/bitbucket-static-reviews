@@ -45,11 +45,11 @@ class Run extends Command
                     'checkstyle',
                     'c',
                     InputOption::VALUE_OPTIONAL | InputOption::VALUE_IS_ARRAY,
-                    'checkstyle file path <filename>:<name>:<root>'
+                    'checkstyle file path <filename>:<root>'
                 ),
                 new InputOption(
                     'config',
-                    null,
+                    '-k',
                     InputOption::VALUE_OPTIONAL,
                     'config file',
                     '.config.php'
