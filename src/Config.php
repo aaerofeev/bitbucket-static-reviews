@@ -61,7 +61,7 @@ class Config
         // Optional
         'statsd'   => [
             'host'      => '',
-            'port'      => 8125,
+            'port'      => null,
             'namespace' => '',
         ],
     ];
