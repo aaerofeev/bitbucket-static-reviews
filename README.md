@@ -100,7 +100,7 @@ return [
 ];
 ```
 
-### Example
+### Example usage
 
 ```bash
 #!/usr/bin/env bash
