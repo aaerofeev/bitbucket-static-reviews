@@ -1,7 +1,7 @@
 ## Интеграция checkstyle-format в stash/bitbucket
 ### Checkstyle-format integration into stash / bitbucket
 
-[See English version below](###in-english)
+[See English version below](#in-english)
 
 Читает формат checkstyle и пишет комментарии к pull-request в stash/bitbucket
 
