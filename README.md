@@ -108,5 +108,5 @@ docker run --rm \
     --entrypoint ${CODE_PATH}/vendor/bin/bitbucket-reviews \
     --interactive \
     ${PHP_IMAGE} \
-    refs/head/${BRANCH_NAME} diff.git -k .config.php -c phan.xml -c eslint.xml:/code
+    run refs/head/${BRANCH_NAME} diff.git -k .config.php -c phan.xml -c eslint.xml:/code
 ```
