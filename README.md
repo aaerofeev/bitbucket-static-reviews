@@ -54,8 +54,8 @@ This project reads checkstyle format reports and writes comments to stash / bitb
 Required options: project, repository, and branch names.
 Comments will be posted to a pull-request with an OPEN status, if any.
 
-1. The results of `git diff origin/master <BRANCH>` or the revisions difference is transmitted to analyziers
-2. Static analyzers' output is collected
+1. The results of `git diff origin/master <BRANCH>` or the revisions difference is transmitted to analyzers
+2. Static analyzers' reports are collected
 3. The comments are analyzed and sent to Bitbucket API
 
 ### Bitbucket API
