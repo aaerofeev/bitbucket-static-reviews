@@ -1,5 +1,5 @@
 ## Интеграция checkstyle-format в stash/bitbucket
-## Checkstyle-format integration into stash / bitbucket
+### Checkstyle-format integration into stash / bitbucket
 
 On English see below
 
