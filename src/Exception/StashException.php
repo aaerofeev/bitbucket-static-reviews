@@ -1,5 +1,5 @@
 <?php
-namespace CheckstyleStash\Exception;
+namespace BitbucketReviews\Exception;
 
 /**
  * Ошибка при работе с API stash

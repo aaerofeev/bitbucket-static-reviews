@@ -1,10 +1,10 @@
 <?php
-namespace CheckstyleStash\Stash;
+namespace BitbucketReviews\Stash;
 
 /**
  * Сущьность комментария
  */
-class Comment implements \JsonSerializable
+class Comment
 {
     /**
      * Использовать общий diff pull request
@@ -57,7 +57,7 @@ class Comment implements \JsonSerializable
     protected $parentId = 0;
 
     /**
-     * @var \CheckstyleStash\Stash\Comment[] Дочерние комментарии
+     * @var \BitbucketReviews\Stash\Comment[] Дочерние комментарии
      */
     protected $comments = [];
 
@@ -72,6 +72,11 @@ class Comment implements \JsonSerializable
     protected $path = '';
 
     /**
+     * @var string Путь до исходного файла, оригинального, обычно то же что и path
+     */
+    protected $srcPath = '';
+
+    /**
      * @var int
      */
     protected $authorId = 0;
@@ -79,7 +84,7 @@ class Comment implements \JsonSerializable
     /**
      * @var string
      */
-    protected $text = 0;
+    protected $text = '';
 
     /**
      * @var string Откуда хеш
@@ -112,19 +117,26 @@ class Comment implements \JsonSerializable
     protected $orphaned = false;
 
     /**
+     * @var int Версия
+     */
+    protected $version = 0;
+
+    /**
      * Создает сущьность из массива
      *
      * @param array $data
-     * @return \CheckstyleStash\Stash\Comment
+     * @return \BitbucketReviews\Stash\Comment
      */
     public static function fromArray(array $data): Comment
     {
         $comment           = new self();
         $comment->id       = $data['id'] ?? 0;
+        $comment->version  = $data['version'] ?? 0;
         $comment->text     = $data['text'] ?? '';
         $comment->authorId = $data['author']['id'] ?? 0;
         $comment->line     = $data['anchor']['line'] ?? 0;
         $comment->path     = $data['anchor']['path'] ?? '';
+        $comment->srcPath  = $data['anchor']['srcPath'] ?? '';
         $comment->fileType = $data['anchor']['fileType'] ?? '';
         $comment->diffType = $data['anchor']['diffType'] ?? '';
         $comment->lineType = $data['anchor']['lineType'] ?? '';
@@ -140,8 +152,8 @@ class Comment implements \JsonSerializable
     /**
      * Добавляет дочерний комментарий
      *
-     * @param \CheckstyleStash\Stash\Comment $comment
-     * @return \CheckstyleStash\Stash\Comment
+     * @param \BitbucketReviews\Stash\Comment $comment
+     * @return \BitbucketReviews\Stash\Comment
      */
     public function addComment(Comment $comment): self
     {
@@ -174,14 +186,16 @@ class Comment implements \JsonSerializable
     /**
      * @see Comment::$path
      * @see Comment::$line
-     * @param string $path
-     * @param int    $line
+     * @param int         $line
+     * @param string      $path
+     * @param string|null $srcPath
      * @return Comment
      */
-    public function setDestination(string $path, int $line): Comment
+    public function setDestination(int $line, string $path, string $srcPath = null): Comment
     {
-        $this->line = $line;
-        $this->path = $path;
+        $this->line    = $line;
+        $this->path    = $path;
+        $this->srcPath = $srcPath ?? $path;
 
         return $this;
     }
@@ -209,7 +223,7 @@ class Comment implements \JsonSerializable
 
     /**
      * @see Comment::$comments
-     * @return \CheckstyleStash\Stash\Comment[]
+     * @return \BitbucketReviews\Stash\Comment[]
      */
     public function getComments(): array
     {
@@ -226,12 +240,42 @@ class Comment implements \JsonSerializable
     }
 
     /**
+     * @see Comment::$lineType
+     * @return string
+     */
+    public function getLineType(): string
+    {
+        return $this->lineType;
+    }
+
+    /**
+     * @see Comment::$lineType
+     * @param string $lineType
+     * @return Comment
+     */
+    public function setLineType(string $lineType): Comment
+    {
+        $this->lineType = $lineType;
+
+        return $this;
+    }
+
+    /**
      * @see Comment::$path
      * @return string
      */
     public function getPath(): string
     {
         return $this->path;
+    }
+
+    /**
+     * @see Comment::$srcPath
+     * @return string
+     */
+    public function getSrcPath(): string
+    {
+        return $this->srcPath;
     }
 
     /**
@@ -300,18 +344,6 @@ class Comment implements \JsonSerializable
     }
 
     /**
-     * @see Comment::$lineType
-     * @param string $lineType
-     * @return Comment
-     */
-    public function setLineType(string $lineType): Comment
-    {
-        $this->lineType = $lineType;
-
-        return $this;
-    }
-
-    /**
      * @see Comment::$fromHash
      * @see Comment::$toHash
      * @param string $fromHash
@@ -327,6 +359,19 @@ class Comment implements \JsonSerializable
     }
 
     /**
+     * Дописывает комментарий
+     *
+     * @param string $text
+     * @return \BitbucketReviews\Stash\Comment
+     */
+    public function appendText(string $text): Comment
+    {
+        $this->text .= $text;
+
+        return $this;
+    }
+
+    /**
      * @see Comment::$orphaned
      * @return bool
      */
@@ -336,9 +381,11 @@ class Comment implements \JsonSerializable
     }
 
     /**
-     * {@inheritdoc}
+     * Получает данные для создания
+     *
+     * @return array
      */
-    public function jsonSerialize(): array
+    public function asArrayCreate(): array
     {
         $data = ['text' => $this->text];
 
@@ -349,13 +396,32 @@ class Comment implements \JsonSerializable
             $data['anchor']['line']     = $this->line;
             $data['anchor']['lineType'] = $this->lineType;
             $data['anchor']['path']     = $this->path;
-            $data['anchor']['srcPath']  = $this->path;
+            $data['anchor']['srcPath']  = $this->srcPath;
             $data['anchor']['fileType'] = $this->fileType;
             $data['anchor']['diffType'] = $this->diffType;
-            $data['anchor']['fromHash'] = $this->fromHash;
-            $data['anchor']['toHash']   = $this->toHash;
+
+            if ($this->fromHash) {
+                $data['anchor']['fromHash'] = $this->fromHash;
+            }
+
+            if ($this->toHash) {
+                $data['anchor']['toHash']   = $this->toHash;
+            }
         }
 
         return $data;
+    }
+
+    /**
+     * Получает данные для обновления
+     *
+     * @return array
+     */
+    public function asArrayUpdate(): array
+    {
+        return [
+            'text'    => $this->text,
+            'version' => $this->version ++,
+        ];
     }
 }

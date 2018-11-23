@@ -1,7 +1,7 @@
 <?php
-namespace CheckstyleStash\Stash;
+namespace BitbucketReviews\Stash;
 
-use CheckstyleStash\Exception\StashException;
+use BitbucketReviews\Exception\StashException;
 use GuzzleHttp;
 use Psr\Http\Message\ResponseInterface;
 
@@ -70,7 +70,7 @@ class API
      * @param string $project
      * @param string $repository
      * @param bool   $debug
-     * @throws \CheckstyleStash\Exception\StashException
+     * @throws \BitbucketReviews\Exception\StashException
      */
     public function __construct(
         string $url,
@@ -107,7 +107,7 @@ class API
     /**
      * Проверяет готовность API
      *
-     * @throws \CheckstyleStash\Exception\StashException
+     * @throws \BitbucketReviews\Exception\StashException
      */
     public function ping(): void
     {
@@ -127,7 +127,7 @@ class API
      *
      * @param string $branch
      * @return int
-     * @throws \CheckstyleStash\Exception\StashException
+     * @throws \BitbucketReviews\Exception\StashException
      */
     public function getOpenPullRequestId(string $branch): int
     {
@@ -151,8 +151,8 @@ class API
      * @param int    $pullRequestId
      * @param string $path
      * @param string $anchorState
-     * @return \CheckstyleStash\Stash\Comment[]
-     * @throws \CheckstyleStash\Exception\StashException
+     * @return \BitbucketReviews\Stash\Comment[]
+     * @throws \BitbucketReviews\Exception\StashException
      */
     public function getComments(int $pullRequestId, string $path, string $anchorState = self::ANCHOR_STATE_ALL): array
     {
@@ -180,10 +180,10 @@ class API
     /**
      * Публикует комментарий
      *
-     * @param int                            $pullRequestId
-     * @param \CheckstyleStash\Stash\Comment $comment
-     * @return \CheckstyleStash\Stash\Comment
-     * @throws \CheckstyleStash\Exception\StashException
+     * @param int                             $pullRequestId
+     * @param \BitbucketReviews\Stash\Comment $comment
+     * @return \BitbucketReviews\Stash\Comment
+     * @throws \BitbucketReviews\Exception\StashException
      */
     public function postComment(int $pullRequestId, Comment $comment): Comment
     {
@@ -194,7 +194,7 @@ class API
                 $this->repository,
                 $pullRequestId
             ),
-            ['json' => $comment]
+            ['json' => $comment->asArrayCreate()]
         );
 
         $data = $this->getResponseAsArray($response, 201);
@@ -207,12 +207,63 @@ class API
     }
 
     /**
+     * Обновляет комментарий
+     *
+     * @param int                             $pullRequestId
+     * @param \BitbucketReviews\Stash\Comment $comment
+     * @return \BitbucketReviews\Stash\Comment
+     * @throws \BitbucketReviews\Exception\StashException
+     */
+    public function updateComment(int $pullRequestId, Comment $comment): Comment
+    {
+        $response = $this->client->put(
+            sprintf(
+                'projects/%s/repos/%s/pull-requests/%d/comments/%d',
+                $this->project,
+                $this->repository,
+                $pullRequestId,
+                $comment->getId()
+            ),
+            ['json' => $comment->asArrayUpdate()]
+        );
+
+        $this->getResponseAsArray($response, 200);
+
+        return $comment;
+    }
+
+    /**
+     * Удаляет комментарий
+     *
+     * @param int                             $pullRequestId
+     * @param \BitbucketReviews\Stash\Comment $comment
+     * @return \BitbucketReviews\Stash\Comment
+     * @throws \BitbucketReviews\Exception\StashException
+     */
+    public function deleteComment(int $pullRequestId, Comment $comment): Comment
+    {
+        $response = $this->client->delete(
+            sprintf(
+                'projects/%s/repos/%s/pull-requests/%d/comments/%d',
+                $this->project,
+                $this->repository,
+                $pullRequestId,
+                $comment->getId()
+            )
+        );
+
+        $this->getResponseAsArray($response, 200);
+
+        return $comment;
+    }
+
+    /**
      * Возвращает тело ответа в виде массива
      *
      * @param \Psr\Http\Message\ResponseInterface $response
      * @param int                                 $expectCode
      * @return array
-     * @throws \CheckstyleStash\Exception\StashException
+     * @throws \BitbucketReviews\Exception\StashException
      */
     protected function getResponseAsArray(ResponseInterface $response, $expectCode): array
     {

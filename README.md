@@ -23,6 +23,20 @@
 
 ### Получение изменений
 
-Для бамбу удобно получать разницу между ревизиями
+Для бамбу удобно получать разницу между ревизиями при помощи git
+
+##### Список файлов
 
 git diff --name-only ${bamboo_planRepository_revision}...${bamboo_planRepository_previousRevision}
+
+##### Дифф
+
+git diff --unified=<context> ${bamboo_planRepository_revision}...${bamboo_planRepository_previousRevision}
+
+context - предпочтительнее передавать 10, т.к больше стеш не дает показать
+
+### Информация по API Stash
+
+https://docs.atlassian.com/bitbucket-server/rest/5.15.0/bitbucket-rest.html?utm_source=%2Fstatic%2Frest%2Fbitbucket-server%2Flatest%2Fbitbucket-rest.html&utm_medium=301#idm45622371276656
+
+https://developer.atlassian.com/server/bitbucket/reference/rest-api/

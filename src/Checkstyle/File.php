@@ -1,5 +1,5 @@
 <?php
-namespace CheckstyleStash\Checkstyle;
+namespace BitbucketReviews\Checkstyle;
 
 /**
  * Сущность файл
@@ -12,7 +12,7 @@ class File
     protected $filename;
 
     /**
-     * @var \CheckstyleStash\Checkstyle\Error[] Ошибки
+     * @var \BitbucketReviews\Checkstyle\Error[] Ошибки
      */
     protected $errors = [];
 
@@ -46,7 +46,7 @@ class File
 
     /**
      * @see File::$errors
-     * @return \CheckstyleStash\Checkstyle\Error[]
+     * @return \BitbucketReviews\Checkstyle\Error[]
      */
     public function getErrors(): array
     {
@@ -65,8 +65,8 @@ class File
     /**
      * Добавляет ошибку
      *
-     * @param \CheckstyleStash\Checkstyle\Error $error
-     * @return \CheckstyleStash\Checkstyle\File
+     * @param \BitbucketReviews\Checkstyle\Error $error
+     * @return \BitbucketReviews\Checkstyle\File
      */
     public function addError(Error $error): self
     {

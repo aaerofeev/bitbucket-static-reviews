@@ -1,18 +1,28 @@
 <?php
-namespace CheckstyleStash\Checkstyle;
+namespace BitbucketReviews\Checkstyle;
 
 /**
  * Сущность ошибка
  */
 class Error
 {
+    /**
+     * Уровни важности
+     */
     public const SEVERITY_INFO = 'info';
-
     public const SEVERITY_WARNING = 'warning';
-
     public const SEVERITY_ERROR = 'error';
-
     public const SEVERITY_IGNORE = 'ignore';
+
+    /**
+     * Порядок важности
+     */
+    public const SEVERITY_ORDER = [
+        self::SEVERITY_IGNORE,
+        self::SEVERITY_INFO,
+        self::SEVERITY_WARNING,
+        self::SEVERITY_ERROR,
+    ];
 
     /**
      * @var int Строка
@@ -76,6 +86,18 @@ class Error
     }
 
     /**
+     * Проверяет подходит ли ошибка под заданную важность
+     *
+     * @param string $min
+     * @return bool
+     */
+    public function isSeverityMatch(string $min): bool
+    {
+        return array_search($min, self::SEVERITY_ORDER, false) <=
+            array_search($this->severity, self::SEVERITY_ORDER, false);
+    }
+
+    /**
      * @see Error::$message
      * @return string
      */
@@ -110,5 +132,15 @@ class Error
     public function validate(): bool
     {
         return $this->message && $this->source;
+    }
+
+    /**
+     * Получает форматированный текст
+     *
+     * @return string
+     */
+    public function getText(): string
+    {
+        return Helper::formatError($this);
     }
 }

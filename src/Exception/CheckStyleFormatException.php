@@ -1,5 +1,5 @@
 <?php
-namespace CheckstyleStash\Exception;
+namespace BitbucketReviews\Exception;
 
 /**
  * Исключение связанное с форматом checkstyle

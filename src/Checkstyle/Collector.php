@@ -1,7 +1,7 @@
 <?php
-namespace CheckstyleStash\Checkstyle;
+namespace BitbucketReviews\Checkstyle;
 
-use CheckstyleStash\Exception\CheckStyleFormatException;
+use BitbucketReviews\Exception\CheckStyleFormatException;
 
 /**
  * Работа с форматом checkstyle
@@ -9,7 +9,7 @@ use CheckstyleStash\Exception\CheckStyleFormatException;
 class Collector
 {
     /**
-     * @var \CheckstyleStash\Checkstyle\File[]
+     * @var \BitbucketReviews\Checkstyle\File[]
      */
     protected $files = [];
 
@@ -17,18 +17,21 @@ class Collector
      * Получает информацию из файла
      *
      * @param string $xmlFilename
+     * @param string $name
      * @param string $rootPath
-     * @throws \CheckstyleStash\Exception\CheckStyleFormatException
+     * @return int
+     * @throws \BitbucketReviews\Exception\CheckStyleFormatException
      */
-    public function parseFile(string $xmlFilename, string $rootPath = '')
+    public function parseFile(string $xmlFilename, string $name, string $rootPath = ''): int
     {
-        $xml = simplexml_load_string(file_get_contents($xmlFilename));
+        $xml   = simplexml_load_string(file_get_contents($xmlFilename));
+        $count = 0;
 
         foreach ($xml->children() as $fileNode) {
             $filename = (string) $fileNode->attributes()->name;
 
             if ($rootPath && strpos($filename, $rootPath) === 0) {
-                $filename = ltrim(mb_substr($filename, mb_strlen($rootPath) - 1), DIRECTORY_SEPARATOR);
+                $filename = ltrim(mb_substr($filename, mb_strlen($rootPath)), DIRECTORY_SEPARATOR);
             }
 
             if (!$filename) {
@@ -37,9 +40,13 @@ class Collector
                 );
             }
 
-            $file = new File($filename, $xmlFilename, []);
+            $file = new File($filename, $name, []);
 
-            foreach ($fileNode->children() as $error) {
+            if (!$fileNode->error) {
+                continue;
+            }
+
+            foreach ($fileNode->error as $error) {
                 $attr  = $error->attributes();
                 $error = new Error(
                     (int) $attr->line,
@@ -49,14 +56,19 @@ class Collector
                     (string) $attr->source
                 );
 
-                $this->files[] = $file->addError($error);
+                $file->addError($error);
+                $count ++;
             }
+
+            $this->files[] = $file;
         }
+
+        return $count;
     }
 
     /**
      * @see Collector::$files
-     * @return \CheckstyleStash\Checkstyle\File[]
+     * @return \BitbucketReviews\Checkstyle\File[]
      */
     public function getFiles(): array
     {
@@ -67,7 +79,7 @@ class Collector
      * Получает файл с ошибками
      *
      * @param string $filename
-     * @return \CheckstyleStash\Checkstyle\File|null
+     * @return \BitbucketReviews\Checkstyle\File|null
      */
     public function getFile(string $filename)
     {

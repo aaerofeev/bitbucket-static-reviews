@@ -1,3 +1,4 @@
-/vendor/
-.idea/**/*
+/vendor
+.idea
 rest-client.env.json
+.config.php
