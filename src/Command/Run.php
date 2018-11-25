@@ -4,7 +4,7 @@ namespace BitbucketReviews\Command;
 use BitbucketReviews\Config;
 use BitbucketReviews\Manager;
 use BitbucketReviews\Stash\API;
-use League\StatsD\Client as StatsdClient;
+use League\StatsD\Client as StatsClient;
 use League\StatsD\Exception\ConfigurationException;
 use ptlis\DiffParser\Parser;
 use Symfony\Component\Console\Command\Command;
@@ -152,7 +152,7 @@ class Run extends Command
             return;
         }
 
-        $statsd = new StatsdClient();
+        $statsd = new StatsClient();
         $statsd->configure($statsConfig);
 
         foreach ($stats as $name => $value) {

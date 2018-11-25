@@ -2,11 +2,11 @@
 namespace BitbucketReviews;
 
 use BitbucketReviews\Checkstyle\Collector;
-use BitbucketReviews\Checkstyle\Error;
-use BitbucketReviews\Checkstyle\Helper;
 use BitbucketReviews\Exception\StashException;
 use BitbucketReviews\Stash\API;
 use BitbucketReviews\Stash\Comment;
+use BitbucketReviews\Stock\Error;
+use BitbucketReviews\Stock\Group;
 use ptlis\DiffParser\File;
 use ptlis\DiffParser\Line;
 use ptlis\DiffParser\Parser as DiffParser;
@@ -134,7 +134,7 @@ class Manager
      * @param string $filename
      * @param string $vcs
      */
-    public function readDiff(string $filename, string $vcs = DiffParser::VCS_GIT): void
+    public function readDiff(string $filename, string $vcs = DiffParser::VCS_GIT)
     {
         $parser     = new DiffParser();
         $this->diff = $parser->parseFile($filename, $vcs);
@@ -159,7 +159,7 @@ class Manager
      * @return array
      * @throws \BitbucketReviews\Exception\StashException
      */
-    public function run()
+    public function run(): array
     {
         $placeId = $this->getStashApi()->getOpenPullRequestId($this->getBranch());
 
@@ -168,7 +168,7 @@ class Manager
                 continue;
             }
 
-            $errorFile = $this->collector->getFile($sourceFile->getNewFilename());
+            $errorFile = $this->collector->getGroup($sourceFile->getNewFilename());
 
             if (!$errorFile) {
                 continue;
@@ -203,7 +203,7 @@ class Manager
 
         foreach ($this->commentsNew as $comment) {
             if ($this->commentsCount > $this->getLimit()) {
-                $this->stat['limit_main'] ++;
+                $this->stat['limit_main']++;
                 break;
             }
 
@@ -279,10 +279,10 @@ class Manager
      * Анализирует файл
      *
      * @param \ptlis\DiffParser\File            $sourceFile
-     * @param \BitbucketReviews\Checkstyle\File $errorFile
+     * @param \BitbucketReviews\Stock\Group     $errorFile
      * @param \BitbucketReviews\Stash\Comment[] $comments
      */
-    private function analyzeFile(File $sourceFile, Checkstyle\File $errorFile, array $comments)
+    private function analyzeFile(File $sourceFile, Group $errorFile, array $comments)
     {
         $comments = array_filter($comments, function (Comment $comment) {
             return $comment->getAuthorId() === $this->getStashApi()->getUserId();
@@ -294,12 +294,14 @@ class Manager
         $errors = array_filter($errorFile->getErrors(), function (Error $error) {
             if (!$error->isSeverityMatch($this->getMinSeverity())) {
                 $this->stat['ignored_by_severity']++;
+
                 return false;
             }
 
             foreach ($this->ignoredText as $pattern) {
                 if (strpos($error->getText(), $pattern) !== false) {
                     $this->stat['ignored_by_text']++;
+
                     return false;
                 }
             }
@@ -310,7 +312,7 @@ class Manager
         foreach ($sourceFile->getHunks() as $hunk) {
             if ($count > $this->getLimitPerFile()) {
                 $this->stat['limit_per_file']++;
-                break;
+                continue;
             }
 
             $lines = array_filter($hunk->getLines(), function (Line $line) {
@@ -376,18 +378,18 @@ class Manager
     /**
      * Обработка одного участка изменений кода
      *
-     * @param \ptlis\DiffParser\File               $sourceFile
-     * @param \ptlis\DiffParser\Line[]             $lines
-     * @param \BitbucketReviews\Checkstyle\Error[] $errors
-     * @param \BitbucketReviews\Stash\Comment[]    $comments
-     * @param int                                  $limit
+     * @param \ptlis\DiffParser\File            $sourceFile
+     * @param \ptlis\DiffParser\Line[]          $lines
+     * @param \BitbucketReviews\Stock\Error[]   $errors
+     * @param \BitbucketReviews\Stash\Comment[] $comments
+     * @param int                               $limit
      * @return int
      */
     protected function processHunk(File $sourceFile, array $lines, array $errors, array $comments, int $limit): int
     {
         /** @var \BitbucketReviews\Stash\Comment[] $newComments */
         $newComments = [];
-        /** @var \BitbucketReviews\Checkstyle\Error[][] $errorContents */
+        /** @var \BitbucketReviews\Stock\Error[][] $errorContents */
         $errorContents = [];
 
         foreach ($errors as $error) {
@@ -446,7 +448,7 @@ class Manager
                     $newComments[$fileLine] = $comment;
 
                     if (\count($newComments) <= $limit) {
-                        $this->commentsNew[]    = $comment;
+                        $this->commentsNew[] = $comment;
                     } else {
                         $this->stat['limit_per_file']++;
                     }
@@ -504,8 +506,8 @@ class Manager
     /**
      * Решает какие комментарии отметить исправленными
      *
-     * @param \BitbucketReviews\Stash\Comment[]      $comments
-     * @param \BitbucketReviews\Checkstyle\Error[][] $contests
+     * @param \BitbucketReviews\Stash\Comment[] $comments
+     * @param \BitbucketReviews\Stock\Error[][] $contests
      * @return int
      */
     protected function resolveFixed(array $comments, array $contests): int

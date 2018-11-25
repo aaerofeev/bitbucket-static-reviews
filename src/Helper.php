@@ -1,5 +1,7 @@
 <?php
-namespace BitbucketReviews\Checkstyle;
+namespace BitbucketReviews;
+
+use BitbucketReviews\Stock\Error;
 
 /**
  * Вспомогательные инструменты
@@ -9,7 +11,7 @@ class Helper
     /**
      * Ключевое слово для исправленной ошибки
      */
-    public const FIXED_WORD = '**[FIXED]**';
+    const FIXED_WORD = '**[FIXED]**';
 
     /**
      * Разделяем текст комментария на отдельные ошибки
@@ -66,7 +68,7 @@ class Helper
     /**
      * Форматирует ошибку в виде текста для пользователя
      *
-     * @param \BitbucketReviews\Checkstyle\Error $error
+     * @param \BitbucketReviews\Stock\Error $error
      * @return string
      */
     public static function formatError(Error $error): string

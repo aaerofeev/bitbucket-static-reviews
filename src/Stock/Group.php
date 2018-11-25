@@ -1,18 +1,18 @@
 <?php
-namespace BitbucketReviews\Checkstyle;
+namespace BitbucketReviews\Stock;
 
 /**
- * Сущность файл
+ * Сущность группы ошибок
  */
-class File
+class Group
 {
     /**
-     * @var string Имя файла
+     * @var string Имя
      */
-    protected $filename;
+    protected $name;
 
     /**
-     * @var \BitbucketReviews\Checkstyle\Error[] Ошибки
+     * @var \BitbucketReviews\Stock\Error[] Ошибки
      */
     protected $errors = [];
 
@@ -24,29 +24,29 @@ class File
     /**
      * Конструктор
      *
-     * @param string $filename
+     * @param string $name
      * @param string $source
      * @param array  $errors
      */
-    public function __construct(string $filename, string $source, array $errors)
+    public function __construct(string $name, string $source, array $errors)
     {
-        $this->filename = $filename;
-        $this->errors   = $errors;
-        $this->source   = $source;
+        $this->name   = $name;
+        $this->errors = $errors;
+        $this->source = $source;
     }
 
     /**
-     * @see File::$filename
+     * @see Group::$name
      * @return string
      */
-    public function getFilename(): string
+    public function getName(): string
     {
-        return $this->filename;
+        return $this->name;
     }
 
     /**
-     * @see File::$errors
-     * @return \BitbucketReviews\Checkstyle\Error[]
+     * @see Group::$errors
+     * @return \BitbucketReviews\Stock\Error[]
      */
     public function getErrors(): array
     {
@@ -54,7 +54,7 @@ class File
     }
 
     /**
-     * @see File::$source
+     * @see Group::$source
      * @return string
      */
     public function getSource(): string
@@ -65,8 +65,8 @@ class File
     /**
      * Добавляет ошибку
      *
-     * @param \BitbucketReviews\Checkstyle\Error $error
-     * @return \BitbucketReviews\Checkstyle\File
+     * @param \BitbucketReviews\Stock\Error $error
+     * @return \BitbucketReviews\Stock\Group
      */
     public function addError(Error $error): self
     {

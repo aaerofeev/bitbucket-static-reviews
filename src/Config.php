@@ -1,8 +1,8 @@
 <?php
 namespace BitbucketReviews;
 
-use BitbucketReviews\Checkstyle\Error;
 use BitbucketReviews\Exception\LogicException;
+use BitbucketReviews\Stock\Error;
 
 /**
  * Конфигурация
@@ -12,22 +12,22 @@ class Config
     /**
      * Только измененное
      */
-    public const INSPECT_CHANGED = 1;
+    const INSPECT_CHANGED = 1;
 
     /**
      * Использовать контекст
      */
-    public const INSPECT_CONTEXT = 2;
+    const INSPECT_CONTEXT = 2;
 
     /**
      * Нет лимита
      */
-    public const NO_LIMIT   = PHP_INT_MAX;
+    const NO_LIMIT   = PHP_INT_MAX;
 
     /**
      * @var array Конфигурация по умолчанию
      */
-    protected const DEFAULT = [
+    const DEFAULT = [
         // Settings from stash/bitbucket
         // https://<hostname>/projects/<project>/repos/<repository>/browse
         'stash'    => [

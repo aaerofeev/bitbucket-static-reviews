@@ -2,6 +2,8 @@
 namespace BitbucketReviews\Checkstyle;
 
 use BitbucketReviews\Exception\CheckStyleFormatException;
+use BitbucketReviews\Stock\Error;
+use BitbucketReviews\Stock\Group;
 
 /**
  * Работа с форматом checkstyle
@@ -9,9 +11,9 @@ use BitbucketReviews\Exception\CheckStyleFormatException;
 class Collector
 {
     /**
-     * @var \BitbucketReviews\Checkstyle\File[]
+     * @var \BitbucketReviews\Stock\Group[]
      */
-    protected $files = [];
+    protected $groups = [];
 
     /**
      * Получает информацию из файла
@@ -40,7 +42,7 @@ class Collector
                 );
             }
 
-            $file = new File($filename, $name, []);
+            $file = new Group($filename, $name, []);
 
             if (!$fileNode->error) {
                 continue;
@@ -60,31 +62,31 @@ class Collector
                 $count ++;
             }
 
-            $this->files[] = $file;
+            $this->groups[] = $file;
         }
 
         return $count;
     }
 
     /**
-     * @see Collector::$files
-     * @return \BitbucketReviews\Checkstyle\File[]
+     * @see Collector::$groups
+     * @return \BitbucketReviews\Stock\Group[]
      */
-    public function getFiles(): array
+    public function getGroups(): array
     {
-        return $this->files;
+        return $this->groups;
     }
 
     /**
      * Получает файл с ошибками
      *
      * @param string $filename
-     * @return \BitbucketReviews\Checkstyle\File|null
+     * @return \BitbucketReviews\Stock\Group|null
      */
-    public function getFile(string $filename)
+    public function getGroup(string $filename)
     {
-        $files = array_filter($this->files, function (File $file) use ($filename) {
-            return $file->getFilename() === $filename && $file->getCount() > 0;
+        $files = array_filter($this->groups, function (Group $file) use ($filename) {
+            return $file->getName() === $filename && $file->getCount() > 0;
         });
 
         return array_pop($files);

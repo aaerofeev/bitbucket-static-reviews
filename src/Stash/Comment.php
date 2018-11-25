@@ -9,42 +9,42 @@ class Comment
     /**
      * Использовать общий diff pull request
      */
-    public const DIFF_TYPE_EFFECTIVE = 'EFFECTIVE';
+    const DIFF_TYPE_EFFECTIVE = 'EFFECTIVE';
 
     /**
      * Использовать diff между двумя произвольными коммитами
      */
-    public const DIFF_TYPE_COMMIT = 'COMMIT';
+    const DIFF_TYPE_COMMIT = 'COMMIT';
 
     /**
      * Использовать diff между двумя диапозонами коммитов
      */
-    public const DIFF_TYPE_RANGE = 'RANGE';
+    const DIFF_TYPE_RANGE = 'RANGE';
 
     /**
      * Использовать изменненый файл
      */
-    public const FILE_TYPE_TO = 'TO';
+    const FILE_TYPE_TO = 'TO';
 
     /**
      * Использовать исходный файл
      */
-    public const FILE_TYPE_FROM = 'FROM';
+    const FILE_TYPE_FROM = 'FROM';
 
     /**
      * Комментарий для контекста
      */
-    public const LINE_TYPE_CONTEXT = 'CONTEXT';
+    const LINE_TYPE_CONTEXT = 'CONTEXT';
 
     /**
      * Для добавленной строки
      */
-    public const LINE_TYPE_ADDED = 'ADDED';
+    const LINE_TYPE_ADDED = 'ADDED';
 
     /**
      * Для удаленной строки
      */
-    public const LINE_TYPE_REMOVED = 'REMOVED';
+    const LINE_TYPE_REMOVED = 'REMOVED';
 
     /**
      * @var int

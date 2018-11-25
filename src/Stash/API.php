@@ -15,17 +15,17 @@ class API
     /**
      * Все комментарии
      */
-    public const ANCHOR_STATE_ALL = 'ALL';
+    const ANCHOR_STATE_ALL = 'ALL';
 
     /**
      * Устаревшие
      */
-    public const ANCHOR_STATE_ORPHANED = 'ORPHANED';
+    const ANCHOR_STATE_ORPHANED = 'ORPHANED';
 
     /**
      * Активные
      */
-    public const ANCHOR_STATE_ACTIVE = 'ACTIVE';
+    const ANCHOR_STATE_ACTIVE = 'ACTIVE';
 
     /**
      * @var string Ключ для авторизации
@@ -78,7 +78,8 @@ class API
         string $project,
         string $repository,
         bool $debug = false
-    ) {
+    )
+    {
         $this->secretKey  = $secretKey;
         $this->project    = $project;
         $this->repository = $repository;
@@ -92,16 +93,7 @@ class API
             ],
         ]);
 
-        $this->ping();
-    }
-
-    /**
-     * @see API::$userId
-     * @return int
-     */
-    public function getUserId(): int
-    {
-        return $this->userId;
+        $this->validate();
     }
 
     /**
@@ -109,7 +101,7 @@ class API
      *
      * @throws \BitbucketReviews\Exception\StashException
      */
-    public function ping(): void
+    protected function validate()
     {
         $response = $this->client->get(sprintf('projects/%s/repos/%s', $this->project, $this->repository));
 
@@ -120,6 +112,15 @@ class API
         }
 
         $this->userId = (int) ($response->getHeader('X-AUSERID')[0] ?? 0);
+    }
+
+    /**
+     * @see API::$userId
+     * @return int
+     */
+    public function getUserId(): int
+    {
+        return $this->userId;
     }
 
     /**
@@ -143,6 +144,27 @@ class API
         }
 
         return (int) $data['values'][0]['id'];
+    }
+
+    /**
+     * Возвращает тело ответа в виде массива
+     *
+     * @param \Psr\Http\Message\ResponseInterface $response
+     * @param int                                 $expectCode
+     * @return array
+     * @throws \BitbucketReviews\Exception\StashException
+     */
+    protected function getResponseAsArray(ResponseInterface $response, $expectCode): array
+    {
+        if ($response->getStatusCode() !== $expectCode) {
+            throw new StashException('Получен не верный код ответа: ' . $response->getStatusCode());
+        }
+
+        try {
+            return GuzzleHttp\json_decode($response->getBody()->getContents(), true);
+        } catch (\InvalidArgumentException $e) {
+            throw new StashException('Получен не верное тело ответа: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -255,26 +277,5 @@ class API
         $this->getResponseAsArray($response, 200);
 
         return $comment;
-    }
-
-    /**
-     * Возвращает тело ответа в виде массива
-     *
-     * @param \Psr\Http\Message\ResponseInterface $response
-     * @param int                                 $expectCode
-     * @return array
-     * @throws \BitbucketReviews\Exception\StashException
-     */
-    protected function getResponseAsArray(ResponseInterface $response, $expectCode): array
-    {
-        if ($response->getStatusCode() !== $expectCode) {
-            throw new StashException('Получен не верный код ответа: ' . $response->getStatusCode());
-        }
-
-        try {
-            return GuzzleHttp\json_decode($response->getBody()->getContents(), true);
-        } catch (\InvalidArgumentException $e) {
-            throw new StashException('Получен не верное тело ответа: ' . $e->getMessage());
-        }
     }
 }

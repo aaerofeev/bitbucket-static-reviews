@@ -1,5 +1,7 @@
 <?php
-namespace BitbucketReviews\Checkstyle;
+namespace BitbucketReviews\Stock;
+
+use BitbucketReviews\Helper;
 
 /**
  * Сущность ошибка
@@ -9,15 +11,15 @@ class Error
     /**
      * Уровни важности
      */
-    public const SEVERITY_INFO = 'info';
-    public const SEVERITY_WARNING = 'warning';
-    public const SEVERITY_ERROR = 'error';
-    public const SEVERITY_IGNORE = 'ignore';
+    const SEVERITY_INFO = 'info';
+    const SEVERITY_WARNING = 'warning';
+    const SEVERITY_ERROR = 'error';
+    const SEVERITY_IGNORE = 'ignore';
 
     /**
      * Порядок важности
      */
-    public const SEVERITY_ORDER = [
+    const SEVERITY_ORDER = [
         self::SEVERITY_IGNORE,
         self::SEVERITY_INFO,
         self::SEVERITY_WARNING,
