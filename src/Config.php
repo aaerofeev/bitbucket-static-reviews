@@ -41,13 +41,13 @@ class Config
             'debug'       => false,
         ],
         'analyzer' => [
-            // Inspection type changed or context
+            // Inspection type: CHANGED or CONTEXT
             'inspect'       => Config::INSPECT_CHANGED,
-            // Error with ignored text will be ignored
+            // Errors with ignored text will be ignored
             'ignoredText'   => [],
             // Files in mask-style to be ignored
             'ignoredFiles'  => [],
-            // Main limit for comments
+            // Primary comments limit
             'limit'         => Config::NO_LIMIT,
             // Limit comments per file
             'limitPerFile'  => Config::NO_LIMIT,
