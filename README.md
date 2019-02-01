@@ -5,6 +5,8 @@
 
 Читает формат checkstyle и пишет комментарии к pull-request в stash/bitbucket
 
+[Dockerhub image](https://hub.docker.com/r/aaerofeev/bitbucket-static-reviews)
+
 ### Возможности
 
 - Публикация комментариев на основе отчетов checkstyle
@@ -137,24 +139,24 @@ Options:
 ```bash
 #!/usr/bin/env bash
 
-# Example: script.sh refs/head/BRANCH 10
-
 set -x
 
 function join { local IFS="$1"; shift; echo "$*"; }
 
-BRANCH_NAME=$1
-CONTEXT_LINES=$2
+BRANCH_NAME=$1 # my-feature
+CONTEXT_LINES=$2 # 10
 CODE_PATH=/code
+
+mkdir reports
 
 ### Saving DIFF for analyzer - diff.txt
 
-git diff -U${CONTEXT_LINES:-10} origin/master...${BRANCH_NAME} > diff.txt
+git diff -U${CONTEXT_LINES:-10} master...${BRANCH_NAME} > diff.txt
 
 ### Collecting ESLINT report - eslint.xml ###
 
 JS_IMAGE=yarn:latest
-ESLINT_FILES=$(git diff --name-only origin/master...${BRANCH_NAME} | grep -E "\.(js|vue)$")
+ESLINT_FILES=$(git diff --name-only master...${BRANCH_NAME} | grep -E "\.(js|vue)$")
 
 docker run --rm \
     --volume $(pwd):${CODE_PATH} \
@@ -162,7 +164,7 @@ docker run --rm \
     --entrypoint=${CODE_PATH}/node_modules/.bin/eslint \
     --interactive \
     ${JS_IMAGE} \
-    ${ESLINT_FILES} -o eslint.xml -f checkstyle
+    ${ESLINT_FILES} -o ./reports/eslint.xml -f checkstyle
 
 ### Collecting PHAN report - phan.xml ###
 
@@ -175,15 +177,19 @@ docker run --rm \
     --entrypoint ${CODE_PATH}/vendor/bin/phan \
     --interactive \
     ${PHP_IMAGE} \
-    -k ${CODE_PATH}/.phan.php -m checkstyle -o phan.xml --include-analysis-file-list ${PHAN_FILES}
+    -k ${CODE_PATH}/.phan.php -m checkstyle -o ./reports/phan.xml --include-analysis-file-list ${PHAN_FILES}
 
-### Sending results to STASH / BITBUCKET ###
+### Static review
+
+REVIEW_IMAGE=aaerofeev/bitbucket-static-reviews:latest
+
+docker pull ${REVIEW_IMAGE}
 
 docker run --rm \
-    --volume $(pwd):${CODE_PATH} \
-    --workdir ${CODE_PATH} \
-    --entrypoint ${CODE_PATH}/vendor/bin/bitbucket-reviews \
-    --interactive \
-    ${PHP_IMAGE} \
-    run refs/head/${BRANCH_NAME} diff.git -k .config.php -c phan.xml -c eslint.xml:/code
+    --volume $(pwd)/reports:/reports \
+    --volume $(pwd)/bin/analyze/review.php:/code/config.php \
+    ${REVIEW_IMAGE} \
+    run -k /code/config.php -c /reports/eslint.xml:${CODE_PATH} -c /reports/phan.xml refs/heads/${BRANCH_NAME} /reports/diff.txt
+
+exit 0
 ```
