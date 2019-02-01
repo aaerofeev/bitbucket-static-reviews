@@ -75,6 +75,7 @@ class Config
      * Загружает конфигурацию из файла
      *
      * @param string $path
+     * @throws \BitbucketReviews\Exception\LogicException
      */
     public function loadConfig(string $path)
     {
@@ -106,6 +107,7 @@ class Config
      *
      * @param string $name
      * @return mixed
+     * @throws \BitbucketReviews\Exception\LogicException
      */
     public function get(string $name)
     {

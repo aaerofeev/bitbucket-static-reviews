@@ -21,6 +21,7 @@ class Run extends Command
 {
     /**
      * {@inheritdoc}
+     * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
      */
     protected function configure()
     {
@@ -68,7 +69,9 @@ class Run extends Command
      * @param \Symfony\Component\Console\Output\OutputInterface $output
      * @return int|null|void
      * @throws \BitbucketReviews\Exception\CheckStyleFormatException
+     * @throws \BitbucketReviews\Exception\LogicException
      * @throws \BitbucketReviews\Exception\StashException
+     * @throws \Symfony\Component\Console\Exception\InvalidArgumentException
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -135,6 +138,7 @@ class Run extends Command
      * @param \BitbucketReviews\Config $config
      * @param array                    $stats
      * @throws \League\StatsD\Exception\ConfigurationException
+     * @throws \BitbucketReviews\Exception\LogicException
      */
     protected function sendStats(Config $config, array $stats)
     {
